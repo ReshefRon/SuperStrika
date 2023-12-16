@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Super Strika</title>
+</head>
+<body>
+    <h1 id="pageTitle">Super Strika</h1>
+
+    <select id="teamList">
+        {% for team in teams %}
+            <option value="{{ team }}">{{ team }}</option>
+        {% endfor %}
+    </select>
+
+    <button onclick="displayGraph()">Display Graph</button>
+
+    <div id="graphFrame">
+        <!-- Graph will be displayed here -->
+    </div>
+
+    <script>
+        function displayGraph() {
+            var selectedTeam = document.getElementById("teamList").value;
+            var headerText = "Strikers goals affection for " + selectedTeam;
+            document.getElementById("pageTitle").innerText = headerText;
+
+            fetch('/get_graph', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({team: selectedTeam})
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Network response was not ok.');
+            })
+            .then(blob => {
+                var imgUrl = URL.createObjectURL(blob);
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.alt = 'Graph';
+                document.getElementById("graphFrame").innerHTML = ''; // Clear existing content
+                document.getElementById("graphFrame").appendChild(img); // Append the image
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
